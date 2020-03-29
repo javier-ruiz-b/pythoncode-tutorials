@@ -20,8 +20,7 @@ if not os.path.isdir("data"):
 data = load_data(ticker, ticker_data, N_STEPS, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS)
 
 # construct the model
-model = create_model(N_STEPS, loss=LOSS, units=UNITS, cell=CELL, n_layers=N_LAYERS,
-                    dropout=DROPOUT, optimizer=OPTIMIZER)
+model = create_model(N_STEPS, loss=LOSS, dropout=DROPOUT, optimizer=OPTIMIZER)
 
 # some tensorflow callbacks
 checkpointer = ModelCheckpoint(os.path.join("results", model_name), save_weights_only=True, save_best_only=True, verbose=1)

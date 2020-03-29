@@ -106,38 +106,38 @@ def load_data(ticker, ticker_data, n_steps=50, scale=True, shuffle=True, lookup_
 
        
     
-def create_model(input_length, units=256, cell=LSTM, n_layers=2, dropout=0.3,
+def create_model(input_length, dropout=0.3,
                 loss="mean_absolute_error", optimizer="rmsprop"):
-    return create_model_lstm_custom(input_length, units, n_layers, dropout, loss, optimizer)
+    return create_model_lstm_custom(input_length, dropout, loss, optimizer)
 
     
-def create_model_lstm_custom(input_length, units, n_layers, dropout, loss, optimizer):
+def create_model_lstm_custom(input_length, dropout, loss, optimizer):
     model = Sequential()
 
     model.add(LSTM(256, return_sequences=True, input_shape=(None, input_length)))
     model.add(Dropout(dropout))
-    model.add(LSTM(256, return_sequences=True))
+    model.add(LSTM(192, return_sequences=True))
     model.add(Dropout(dropout))
     model.add(LSTM(128, return_sequences=False))
     model.add(Dropout(dropout))
-    model.add(Dense(1, activation="linear"))
+    model.add(Dense(1, activation="relu"))
     model.compile(loss=loss, metrics=[
                   "mean_absolute_error"], optimizer=optimizer)
 
     return model    
 
 
-def create_model_bidirectional_lstm(input_length, units, n_layers, dropout, loss, optimizer):
+def create_model_bidirectional_lstm(input_length, dropout, loss, optimizer):
     model = Sequential()
-    
-    model.add(LSTM(units, return_sequences=True, input_shape=(None, input_length)))
+
+    model.add(Bidirectional(LSTM(256, return_sequences=True), input_shape=(None, input_length)))
     model.add(Dropout(dropout))
 
-    model.add(Bidirectional(LSTM(units, return_sequences=True)))
+    model.add(Bidirectional(LSTM(256, return_sequences=True)))
     model.add(Dropout(dropout))
 
-    # model.add(Bidirectional(LSTM(units=256, return_sequences=False)))
-    # model.add(Dropout(dropout))
+    model.add(Bidirectional(LSTM(128, return_sequences=False)))
+    model.add(Dropout(dropout))
 
     model.add(Dense(1, activation="linear"))
     model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
@@ -145,12 +145,12 @@ def create_model_bidirectional_lstm(input_length, units, n_layers, dropout, loss
     return model
 
 
-def create_model_lstm_simplified(input_length, units, n_layers, dropout, loss, optimizer):
+def create_model_lstm_simplified(input_length, dropout, loss, optimizer):
     model = Sequential()
 
-    model.add(LSTM(units, return_sequences=True, input_shape=(None, input_length)))
+    model.add(LSTM(256, return_sequences=True, input_shape=(None, input_length)))
     model.add(Dropout(dropout))
-    model.add(LSTM(units, return_sequences=False))
+    model.add(LSTM(256, return_sequences=False))
     model.add(Dropout(dropout))
     model.add(Dense(1, activation="linear"))
     model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
@@ -158,23 +158,23 @@ def create_model_lstm_simplified(input_length, units, n_layers, dropout, loss, o
     return model
 
     
-def create_model_lstm_original(input_length, units=256, cell=LSTM, n_layers=2, dropout=0.3,
-                loss="mean_absolute_error", optimizer="rmsprop"):
-    model = Sequential()
-    for i in range(n_layers):
-        if i == 0:
-            # first layer
-            model.add(cell(units, return_sequences=True, input_shape=(None, input_length)))
-        elif i == n_layers - 1:
-            # last layer
-            model.add(cell(units, return_sequences=False))
-        else:
-            # hidden layers
-            model.add(cell(units, return_sequences=True))
-        # add dropout after each layer
-        model.add(Dropout(dropout))
+# def create_model_lstm_original(input_length, dropout=0.3,
+#                 loss="mean_absolute_error", optimizer="rmsprop"):
+#     model = Sequential()
+#     for i in range(n_layers):
+#         if i == 0:
+#             # first layer
+#             model.add(cell(units, return_sequences=True, input_shape=(None, input_length)))
+#         elif i == n_layers - 1:
+#             # last layer
+#             model.add(cell(units, return_sequences=False))
+#         else:
+#             # hidden layers
+#             model.add(cell(units, return_sequences=True))
+#         # add dropout after each layer
+#         model.add(Dropout(dropout))
     
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+#     model.add(Dense(1, activation="linear"))
+#     model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
 
-    return model
+#     return model

@@ -49,8 +49,7 @@ data = load_data(ticker, ticker_data, N_STEPS, lookup_step=LOOKUP_STEP, test_siz
                 feature_columns=FEATURE_COLUMNS, shuffle=False)
 
 # construct the model
-model = create_model(N_STEPS, loss=LOSS, units=UNITS, cell=CELL, n_layers=N_LAYERS,
-                    dropout=DROPOUT, optimizer=OPTIMIZER)
+model = create_model(N_STEPS, loss=LOSS, dropout=DROPOUT, optimizer=OPTIMIZER)
 
 model_path = os.path.join("results", model_name) + ".h5"
 model.load_weights(model_path)
@@ -64,4 +63,4 @@ print("Mean Absolute Error:", mean_absolute_error)
 future_price = predict(model, data)
 print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
 print("Accuracy Score:", get_accuracy(model, data))
-# plot_graph(model, data)
+plot_graph(model, data)

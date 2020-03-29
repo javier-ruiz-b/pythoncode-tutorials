@@ -18,11 +18,11 @@ date_now = time.strftime("%Y-%m-%d")
 
 ### model parameters
 
-N_LAYERS = 2
+# N_LAYERS = 2
 # LSTM cell
 CELL = LSTM
 # 256 LSTM neurons
-UNITS = 128
+# UNITS = 128
 # 40% dropout
 DROPOUT = 0.4
 
@@ -37,10 +37,10 @@ EPOCHS = 300
 
 # stock market
 ticker = "FB"
-date_now = "2020-03-24"
+date_now = "2020-03-29"
 ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
 
 ticker_data = pd.read_csv(ticker_data_filename) 
 
 # model name to save
-model_name = f"{date_now}_{ticker}-{LOSS}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}"
+model_name = f"{date_now}_{ticker}-{LOSS}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}"
