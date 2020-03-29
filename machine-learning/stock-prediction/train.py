@@ -26,7 +26,7 @@ model = create_model(N_STEPS, loss=LOSS, dropout=DROPOUT, optimizer=OPTIMIZER)
 checkpointer = ModelCheckpoint(os.path.join("results", model_name), save_weights_only=True, save_best_only=True, verbose=1)
 tensorboard = TensorBoard(log_dir=os.path.join("logs", model_name))
 earlystopping = EarlyStopping(
-    monitor='val_loss', min_delta=0, patience=20, verbose=1, mode='auto', baseline=None)
+    monitor='val_loss', min_delta=0, patience=PATIENCE, verbose=1, mode='auto', baseline=None)
 
 
 history = model.fit(data["X_train"], data["y_train"],

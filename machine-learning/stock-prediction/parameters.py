@@ -33,7 +33,8 @@ LOSS = "mse"
 OPTIMIZER = "adam"
 # OPTIMIZER = "rmsprop"
 BATCH_SIZE = 64
-EPOCHS = 300
+EPOCHS = 600
+PATIENCE = 25 
 
 # stock market
 ticker = "FB"

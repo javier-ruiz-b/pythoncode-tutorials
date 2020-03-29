@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Bidirectional, LSTM, Dense, Dropout
+from tensorflow.keras.layers import Flatten, TimeDistributed, InputLayer, Bidirectional, LSTM, Dense, Dropout, Conv1D, MaxPooling1D
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from yahoo_fin import stock_info as si
@@ -108,39 +108,92 @@ def load_data(ticker, ticker_data, n_steps=50, scale=True, shuffle=True, lookup_
     
 def create_model(input_length, dropout=0.3,
                 loss="mean_absolute_error", optimizer="rmsprop"):
-    return create_model_lstm_custom(input_length, dropout, loss, optimizer)
+    return create_model_conv_lstm(input_length, dropout, loss, optimizer)
 
-    
-def create_model_lstm_custom(input_length, dropout, loss, optimizer):
+
+def create_model_conv_lstm(input_length, dropout, loss, optimizer):
+    model = Sequential()
+    model.add(Conv1D(filters=256, kernel_size=1,
+                     activation='relu', input_shape=(5, input_length)))
+    model.add(Conv1D(filters=256, kernel_size=1, activation='relu'))
+    # model.add(Dropout(dropout))
+    model.add(MaxPooling1D(pool_size=2, padding="same"))
+    model.add(Conv1D(filters=128, kernel_size=1, activation='relu'))
+    model.add(Conv1D(filters=128, kernel_size=1, activation='relu'))
+    # model.add(Dropout(dropout))
+    model.add(MaxPooling1D(pool_size=2, padding="same"))
+    # model.add(Flatten())
+    # model.add(LSTM(50, activation='relu'))
+
+
+    # model.add(InputLayer(input_shape=(None, input_length)))
+    # model.add(Conv1D(filters=256, kernel_size=1, activation="relu"))
+    # model.add(MaxPooling1D(2, padding="same"))
+
+    model.add(LSTM(192, return_sequences=True))
+    model.add(Dropout(dropout))
+    # model.add(LSTM(192, return_sequences=True))
+    # model.add(Dropout(dropout))
+    model.add(LSTM(128, return_sequences=False))
+    model.add(Dropout(dropout))
+
+    model.add(Dense(1, activation="relu"))
+    model.compile(loss=loss, metrics=[
+                  "mean_absolute_error"], optimizer=optimizer)
+
+    model.summary()
+    return model
+
+def create_model_mixed_bidirectional_lstm(input_length, dropout, loss, optimizer):
     model = Sequential()
 
-    model.add(LSTM(256, return_sequences=True, input_shape=(None, input_length)))
+    model.add(Bidirectional(LSTM(256, return_sequences=True),
+                            input_shape=(None, input_length)))
     model.add(Dropout(dropout))
     model.add(LSTM(192, return_sequences=True))
     model.add(Dropout(dropout))
     model.add(LSTM(128, return_sequences=False))
     model.add(Dropout(dropout))
+
     model.add(Dense(1, activation="relu"))
     model.compile(loss=loss, metrics=[
                   "mean_absolute_error"], optimizer=optimizer)
 
-    return model    
+    return model
+
+
+def create_model_lstm_3(input_length, dropout, loss, optimizer):
+    model = Sequential()
+
+    model.add(LSTM(256, return_sequences=True,
+                   input_shape=(None, input_length)))
+    model.add(Dropout(dropout))
+    model.add(LSTM(192, return_sequences=True))
+    model.add(Dropout(dropout))
+    model.add(LSTM(128, return_sequences=False))
+    model.add(Dropout(dropout))
+
+    model.add(Dense(1, activation="relu"))
+    model.compile(loss=loss, metrics=[
+                  "mean_absolute_error"], optimizer=optimizer)
+
+    return model
 
 
 def create_model_bidirectional_lstm(input_length, dropout, loss, optimizer):
     model = Sequential()
 
-    model.add(Bidirectional(LSTM(256, return_sequences=True), input_shape=(None, input_length)))
+    model.add(Bidirectional(LSTM(256, return_sequences=True),
+                            input_shape=(None, input_length)))
     model.add(Dropout(dropout))
-
-    model.add(Bidirectional(LSTM(256, return_sequences=True)))
+    model.add(Bidirectional(LSTM(192, return_sequences=True)))
     model.add(Dropout(dropout))
-
     model.add(Bidirectional(LSTM(128, return_sequences=False)))
     model.add(Dropout(dropout))
 
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(1, activation="relu"))
+    model.compile(loss=loss, metrics=[
+                  "mean_absolute_error"], optimizer=optimizer)
 
     return model
 
