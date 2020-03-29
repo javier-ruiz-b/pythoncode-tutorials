@@ -45,7 +45,7 @@ def predict(model, data, classification=False):
 
 
 # load the data
-data = load_data(ticker, N_STEPS, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE,
+data = load_data(ticker, ticker_data, N_STEPS, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE,
                 feature_columns=FEATURE_COLUMNS, shuffle=False)
 
 # construct the model
@@ -64,4 +64,4 @@ print("Mean Absolute Error:", mean_absolute_error)
 future_price = predict(model, data)
 print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
 print("Accuracy Score:", get_accuracy(model, data))
-plot_graph(model, data)
+# plot_graph(model, data)

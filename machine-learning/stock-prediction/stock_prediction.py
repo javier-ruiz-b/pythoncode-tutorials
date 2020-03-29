@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.layers import Bidirectional, LSTM, Dense, Dropout
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from yahoo_fin import stock_info as si
@@ -10,7 +10,7 @@ import pandas as pd
 import random
 
 
-def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, 
+def load_data(ticker, ticker_data, n_steps=50, scale=True, shuffle=True, lookup_step=1, 
                 test_size=0.2, feature_columns=['adjclose', 'volume', 'open', 'high', 'low']):
     """
     Loads data from Yahoo Finance source, as well as scaling, shuffling, normalizing and splitting.
@@ -23,6 +23,10 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1,
         test_size (float): ratio for test data, default is 0.2 (20% testing data)
         feature_columns (list): the list of features to use to feed into the model, default is everything grabbed from yahoo_fin
     """
+    if isinstance(ticker_data, pd.DataFrame):
+        ticker = ticker_data
+
+
     # see if ticker is already a loaded stock from yahoo finance
     if isinstance(ticker, str):
         # load it from yahoo_fin library
@@ -100,7 +104,61 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1,
     return result
 
 
+       
+    
 def create_model(input_length, units=256, cell=LSTM, n_layers=2, dropout=0.3,
+                loss="mean_absolute_error", optimizer="rmsprop"):
+    return create_model_lstm_custom(input_length, units, n_layers, dropout, loss, optimizer)
+
+    
+def create_model_lstm_custom(input_length, units, n_layers, dropout, loss, optimizer):
+    model = Sequential()
+
+    model.add(LSTM(256, return_sequences=True, input_shape=(None, input_length)))
+    model.add(Dropout(dropout))
+    model.add(LSTM(256, return_sequences=True))
+    model.add(Dropout(dropout))
+    model.add(LSTM(128, return_sequences=False))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation="linear"))
+    model.compile(loss=loss, metrics=[
+                  "mean_absolute_error"], optimizer=optimizer)
+
+    return model    
+
+
+def create_model_bidirectional_lstm(input_length, units, n_layers, dropout, loss, optimizer):
+    model = Sequential()
+    
+    model.add(LSTM(units, return_sequences=True, input_shape=(None, input_length)))
+    model.add(Dropout(dropout))
+
+    model.add(Bidirectional(LSTM(units, return_sequences=True)))
+    model.add(Dropout(dropout))
+
+    # model.add(Bidirectional(LSTM(units=256, return_sequences=False)))
+    # model.add(Dropout(dropout))
+
+    model.add(Dense(1, activation="linear"))
+    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+
+    return model
+
+
+def create_model_lstm_simplified(input_length, units, n_layers, dropout, loss, optimizer):
+    model = Sequential()
+
+    model.add(LSTM(units, return_sequences=True, input_shape=(None, input_length)))
+    model.add(Dropout(dropout))
+    model.add(LSTM(units, return_sequences=False))
+    model.add(Dropout(dropout))
+    model.add(Dense(1, activation="linear"))
+    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+
+    return model
+
+    
+def create_model_lstm_original(input_length, units=256, cell=LSTM, n_layers=2, dropout=0.3,
                 loss="mean_absolute_error", optimizer="rmsprop"):
     model = Sequential()
     for i in range(n_layers):
