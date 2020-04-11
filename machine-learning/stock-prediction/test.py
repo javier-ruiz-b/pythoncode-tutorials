@@ -1,5 +1,7 @@
-from stock_prediction import create_model, load_data, np
+from model import create_model
+from load_data import load_data
 from parameters import *
+import numpy as np
 import matplotlib.pyplot as plt
 import sys
 from sklearn.metrics import accuracy_score
@@ -47,7 +49,7 @@ def predict(model, data, classification=False):
 
 
 # load the data
-data = load_data(ticker, ticker_data, N_STEPS, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE,
+data = load_data(test_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE,
                  feature_columns=FEATURE_COLUMNS, stat_columns=STAT_COLUMNS, target=TARGET, shuffle=False)
 
 # construct the model

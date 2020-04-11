@@ -2,6 +2,9 @@ import os
 import time
 import pandas as pd
 import tensorflow as tf
+import glob
+from os import listdir
+from os.path import isfile, join
 from tensorflow.keras.layers import LSTM
 
 
@@ -20,7 +23,12 @@ STAT_COLUMNS = []
 # date now
 date_now = time.strftime("%Y-%m-%d")
 
-### training parameters
+### data
+dataDir = "data"
+test_ticker = "FB"
+test_files = glob.glob(join(dataDir, test_ticker + '*.csv'))
+train_files = [f for f in listdir(dataDir) if isfile(join(dataDir, f))]
+train_files = test_files
 
 # mean squared error loss
 LOSS = "mse"
@@ -29,16 +37,8 @@ OPTIMIZER = "adam"
 # OPTIMIZER = "rmsprop"
 BATCH_SIZE = 256 # train x batches at once
 EPOCHS = 600
-PATIENCE = 30
+PATIENCE = 2
 
-# stock market
-ticker = "AAPL"
-date_now = "2020-01-08"
-# ticker = "FB"
-# date_now = "2020-03-29"
-ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
-
-ticker_data = pd.read_csv(ticker_data_filename) 
 
 # model name to save
-model_name = f"{date_now}_{ticker}-seq-{N_STEPS}-step-{LOOKUP_STEP}"
+model_name = f"{date_now}-seq-{N_STEPS}-step-{LOOKUP_STEP}-opt-{OPTIMIZER}-batch-{BATCH_SIZE}"

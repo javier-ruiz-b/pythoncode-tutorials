@@ -1,4 +1,5 @@
-from stock_prediction import create_model, load_data
+from model import create_model
+from load_data import load_data
 from tensorflow.keras.layers import LSTM
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
 import os
@@ -16,7 +17,7 @@ if not os.path.isdir("data"):
     os.mkdir("data")
 
 # load the data
-data = load_data(ticker, ticker_data, N_STEPS, lookup_step=LOOKUP_STEP,
+data = load_data(train_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP,
                  test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS,  
                  stat_columns=STAT_COLUMNS, target=TARGET)
 
