@@ -129,7 +129,7 @@ def load_data(ticker, ticker_data, n_steps=50, shuffle=True, lookup_step=1,
 
 
 
-def create_model(input_length, dropout=0.3,
+def create_model(input_length, dropout=0.4,
                 loss="mean_absolute_error", optimizer="rmsprop"):
     return create_model_lstm_3(input_length, dropout, loss, optimizer)
 
@@ -257,23 +257,23 @@ def create_model_lstm_simplified(input_length, dropout, loss, optimizer):
     return model
 
 
-# def create_model_lstm_original(input_length, dropout=0.3,
-#                 loss="mean_absolute_error", optimizer="rmsprop"):
-#     model = Sequential()
-#     for i in range(n_layers):
-#         if i == 0:
-#             # first layer
-#             model.add(cell(units, return_sequences=True, input_shape=(None, input_length)))
-#         elif i == n_layers - 1:
-#             # last layer
-#             model.add(cell(units, return_sequences=False))
-#         else:
-#             # hidden layers
-#             model.add(cell(units, return_sequences=True))
-#         # add dropout after each layer
-#         model.add(Dropout(dropout))
+def create_model_lstm_original(input_length, dropout=0.4,
+                loss="mean_absolute_error", optimizer="rmsprop"):
+    model = Sequential()
+    for i in range(n_layers):
+        if i == 0:
+            # first layer
+            model.add(LSTM(units, return_sequences=True, input_shape=(None, input_length)))
+        elif i == n_layers - 1:
+            # last layer
+            model.add(LSTM(units, return_sequences=False))
+        else:
+            # hidden layers
+            model.add(LSTM(units, return_sequences=True))
+        # add dropout after each layer
+        model.add(Dropout(dropout))
 
-#     model.add(Dense(1, activation="linear"))
-#     model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(1, activation="linear"))
+    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
 
-#     return model
+    return model

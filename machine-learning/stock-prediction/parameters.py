@@ -15,20 +15,10 @@ TEST_SIZE = 0.2
 # features to use
 FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low"]
 TARGET = "adjclose"
-STAT_COLUMNS = ["macd", "kdjk"]
-# STAT_COLUMNS = []
+# STAT_COLUMNS = ["macd", "kdjk"]
+STAT_COLUMNS = []
 # date now
 date_now = time.strftime("%Y-%m-%d")
-
-### model parameters
-
-# N_LAYERS = 2
-# LSTM cell
-CELL = LSTM
-# 256 LSTM neurons
-# UNITS = 128
-# 40% dropout
-DROPOUT = 0.4
 
 ### training parameters
 
@@ -51,4 +41,4 @@ ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
 ticker_data = pd.read_csv(ticker_data_filename) 
 
 # model name to save
-model_name = f"{date_now}_{ticker}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}"
+model_name = f"{date_now}_{ticker}-seq-{N_STEPS}-step-{LOOKUP_STEP}"

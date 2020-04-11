@@ -21,7 +21,7 @@ data = load_data(ticker, ticker_data, N_STEPS, lookup_step=LOOKUP_STEP,
                  stat_columns=STAT_COLUMNS, target=TARGET)
 
 # construct the model
-model = create_model(N_STEPS, loss=LOSS, dropout=DROPOUT, optimizer=OPTIMIZER)
+model = create_model(N_STEPS, loss=LOSS, optimizer=OPTIMIZER)
 
 # some tensorflow callbacks
 checkpointer = ModelCheckpoint(os.path.join("results", model_name), save_weights_only=True, save_best_only=True, verbose=1)
