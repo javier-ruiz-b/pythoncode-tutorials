@@ -13,9 +13,20 @@ def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
               test_size_in_days=40, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
               stat_columns=['macd'], target="adjclose"):
 
+    last_date = ""
+    last_date_file = ""
     results = {}
     for file in csv_files:
         df = pd.read_csv(file)
+        current_last_date = df.values[-1][0]
+        if last_date == "":
+            last_date = current_last_date
+            last_date_file = file
+        elif last_date != current_last_date:
+            raise ValueError("Expecting same last date on data: ",
+                             file, " last date is ", current_last_date  , " where ",
+                         last_date_file, " date is ", last_date)
+            
         results[file] = load_data_single(
             df, n_steps, shuffle, lookup_step, test_size_in_days, feature_columns, stat_columns, target)
 
@@ -29,6 +40,16 @@ def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
                 result[key] = np.append(result[key], results[file][key], axis=0)
             else:
                 result[key] = results[file][key]
+
+
+    train_samples = len(result["X_train"])
+    test_samples = len(result["X_test"])
+    
+    test_percent = test_samples*100.0 / float(test_samples + train_samples)
+
+    print(f"Train samples: {train_samples}. Test samples: {test_samples}. Percent={test_percent:.2f}")
+    print("Train shape: ", result["X_train"].shape)
+    
     return result
     
 
@@ -55,8 +76,6 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     for stat in stat_columns:
         df[stat] = sdf[stat]
 
-    print(df)
-
     # this will contain all the elements we want to return from this function
     result = {}
     # we will also return the original dataframe itself
@@ -74,7 +93,7 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
             np.expand_dims(df[column].values, axis=1))
         column_scaler[column] = scaler
 
-    print(column_scaler)
+    # print(column_scaler)
     # add the MinMaxScaler instances to the result returned
     result["column_scaler"] = column_scaler
 
@@ -118,16 +137,13 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     # reshape X to fit the neural network
     X = X.reshape((X.shape[0], X.shape[2], X.shape[1]))
 
-    print("Shapes: ", X.shape)
-
     samples = len(y)
     test_size = test_size_in_days / float(samples)
-    print("test_size: ", test_size)
+    print(f"test_size: {test_size:.2f}")
 
     # split the dataset
     result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
         X, y, test_size=test_size, shuffle=shuffle)
-
 
 
     # result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(

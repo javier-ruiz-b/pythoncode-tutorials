@@ -26,14 +26,14 @@ model = create_model(N_STEPS, loss=LOSS, optimizer=OPTIMIZER)
 
 # some tensorflow callbacks
 checkpointer = ModelCheckpoint(os.path.join("results", model_name), save_weights_only=True, save_best_only=True, verbose=1)
-# tensorboard = TensorBoard(log_dir=os.path.join("logs", model_name))
+tensorboard = TensorBoard(log_dir=os.path.join("logs", model_name))
 earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=PATIENCE, verbose=1, mode='auto', baseline=None)
 
 history = model.fit(data["X_train"], data["y_train"],
                     batch_size=BATCH_SIZE,
                     epochs=EPOCHS,
                     validation_data=(data["X_test"], data["y_test"]),
-                    callbacks=[checkpointer,  earlystopping],
+                    callbacks=[checkpointer, tensorboard, earlystopping],
                     verbose=0)
 
 model.save(os.path.join("results", model_name) + ".h5")

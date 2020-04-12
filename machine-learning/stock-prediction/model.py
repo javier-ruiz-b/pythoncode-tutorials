@@ -132,6 +132,8 @@ def create_model_lstm_simplified(input_length, dropout, loss, optimizer):
 def create_model_lstm_original(input_length, dropout=0.4,
                 loss="mean_absolute_error", optimizer="rmsprop"):
     model = Sequential()
+    n_layers = 3
+    units = 256
     for i in range(n_layers):
         if i == 0:
             # first layer
