@@ -15,6 +15,8 @@ LOOKUP_STEP = 5
 
 # test ratio size, 0.2 is 20%
 TEST_SIZE = 0.2
+TEST_SIZE_IN_DAYS = 300
+
 # features to use
 FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low"]
 TARGET = "adjclose"
@@ -27,8 +29,8 @@ date_now = time.strftime("%Y-%m-%d")
 dataDir = "data"
 test_ticker = "FB"
 test_files = glob.glob(join(dataDir, test_ticker + '*.csv'))
-train_files = [f for f in listdir(dataDir) if isfile(join(dataDir, f))]
-train_files = test_files
+train_files = glob.glob(join(dataDir, '*.csv'))
+# train_files = test_files
 
 # mean squared error loss
 LOSS = "mse"

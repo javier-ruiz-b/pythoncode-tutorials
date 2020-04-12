@@ -18,7 +18,7 @@ if not os.path.isdir("data"):
 
 # load the data
 data = load_data(train_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP,
-                 test_size=TEST_SIZE, feature_columns=FEATURE_COLUMNS,  
+                 test_size_in_days=TEST_SIZE_IN_DAYS, feature_columns=FEATURE_COLUMNS,  
                  stat_columns=STAT_COLUMNS, target=TARGET)
 
 # construct the model

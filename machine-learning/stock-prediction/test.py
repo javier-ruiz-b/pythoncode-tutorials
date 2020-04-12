@@ -49,7 +49,7 @@ def predict(model, data, classification=False):
 
 
 # load the data
-data = load_data(test_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE,
+data = load_data(test_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP, test_size_in_days=TEST_SIZE_IN_DAYS,
                  feature_columns=FEATURE_COLUMNS, stat_columns=STAT_COLUMNS, target=TARGET, shuffle=False)
 
 # construct the model

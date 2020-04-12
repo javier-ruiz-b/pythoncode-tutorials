@@ -10,21 +10,31 @@ import random
 
 
 def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
-              test_size=0.2, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
+              test_size_in_days=40, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
               stat_columns=['macd'], target="adjclose"):
 
+    results = {}
+    for file in csv_files:
+        df = pd.read_csv(file)
+        results[file] = load_data_single(
+            df, n_steps, shuffle, lookup_step, test_size_in_days, feature_columns, stat_columns, target)
+
     if len(csv_files) == 1:
-        df = pd.read_csv(csv_files[0])
-        return load_data_single(df, n_steps, shuffle, lookup_step, test_size, feature_columns, stat_columns, target)
-
-    # csv_imported_data = {}
-    # for file in csv_files:
-    #     csv_imported_data[file] = pd.read_csv(file)
-
+        return results[csv_files[0]]
+    
+    result = {}
+    for file in csv_files:
+        for key in ["X_train", "X_test", "y_train", "y_test"]:
+            if key in result:
+                result[key] = np.append(result[key], results[file][key], axis=0)
+            else:
+                result[key] = results[file][key]
+    return result
+    
 
 
 def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
-              test_size=0.2, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
+              test_size_in_days=40, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
               stat_columns=['macd'], target="adjclose"):
     """
     Loads data from dir, as well as scaling, shuffling, normalizing and splitting.
@@ -108,12 +118,17 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     # reshape X to fit the neural network
     X = X.reshape((X.shape[0], X.shape[2], X.shape[1]))
 
-    print("Shapes")
-    print(X.shape)
+    print("Shapes: ", X.shape)
+
+    samples = len(y)
+    test_size = test_size_in_days / float(samples)
+    print("test_size: ", test_size)
 
     # split the dataset
     result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
         X, y, test_size=test_size, shuffle=shuffle)
+
+
 
     # result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
     #     X, y, test_size=test_size, shuffle=False)
