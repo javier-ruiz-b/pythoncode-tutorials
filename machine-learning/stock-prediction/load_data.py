@@ -8,8 +8,28 @@ import numpy as np
 import pandas as pd
 import random
 
+def interpolate_missing_values(df, feature_columns):
+    for column in feature_columns:
+        df[column] = df[column].replace([np.inf, -np.inf, 0], np.nan)
+        df[column] = df[column].interpolate()
+    return df
 
-def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
+def relativize_df(df, feature_columns):
+    new_cols = ["date"] + feature_columns
+    result = pd.DataFrame(columns=new_cols)
+    result["date"] = df.values[1:,0]
+    for column in feature_columns:
+        col_data = df[column]
+        col_data_shifted = col_data.shift(1)
+        col_data_relativized = col_data / col_data_shifted
+        # print(col_data_relativized[1:])
+        result[column] = col_data_relativized.values[1:]
+    
+    # print(result)
+    return result
+
+
+def load_data(csv_files, relativize=False, n_steps=50, shuffle=True, lookup_step=1,
               test_size_in_days=40, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
               stat_columns=['macd'], target="adjclose"):
 
@@ -18,6 +38,11 @@ def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
     results = {}
     for file in csv_files:
         df = pd.read_csv(file)
+        # if relativize:
+        #     df = relativize_df(df, feature_columns)
+
+        df = interpolate_missing_values(df, feature_columns)
+
         current_last_date = df.values[-1][0]
         if last_date == "":
             last_date = current_last_date
@@ -25,7 +50,7 @@ def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
         elif last_date != current_last_date:
             raise ValueError("Expecting same last date on data: ",
                              file, " last date is ", current_last_date  , " where ",
-                         last_date_file, " date is ", last_date)
+                             last_date_file, " date is ", last_date)
             
         results[file] = load_data_single(
             df, n_steps, shuffle, lookup_step, test_size_in_days, feature_columns, stat_columns, target)
@@ -47,7 +72,7 @@ def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
     
     test_percent = test_samples*100.0 / float(test_samples + train_samples)
 
-    print(f"Train samples: {train_samples}. Test samples: {test_samples}. Percent={test_percent:.2f}")
+    print(f"Train samples: {train_samples}. Test samples: {test_samples}. TestPercent: {test_percent:.2f}")
     print("Train shape: ", result["X_train"].shape)
     
     return result
@@ -56,7 +81,7 @@ def load_data(csv_files, n_steps=50, shuffle=True, lookup_step=1,
 
 def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
               test_size_in_days=40, feature_columns=['adjclose', 'volume', 'open', 'high', 'low'],
-              stat_columns=['macd'], target="adjclose"):
+              stat_columns=['macd'], target="adjclose", scale_sequences=True):
     """
     Loads data from dir, as well as scaling, shuffling, normalizing and splitting.
     Params:
@@ -102,7 +127,9 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
 
     # last `lookup_step` columns contains NaN in future column
     # get them before droping NaNs
-    last_sequence = np.array(df[feature_columns].tail(lookup_step))
+    # last_sequence = np.array(df[feature_columns].tail(lookup_step))
+    # get last_sequence for prediction
+    last_sequence = np.array(df[feature_columns].tail(n_steps))
 
     # drop NaNs
     df.dropna(inplace=True)
@@ -118,15 +145,30 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     # get the last sequence by appending the last `n_step` sequence with `lookup_step` sequence
     # for instance, if n_steps=50 and lookup_step=10, last_sequence should be of 59 (that is 50+10-1) length
     # this last_sequence will be used to predict in future dates that are not available in the dataset
-    last_sequence = list(sequences) + list(last_sequence)
-    # shift the last sequence by -1
-    last_sequence = np.array(pd.DataFrame(last_sequence).shift(-1).dropna())
+    # last_sequence = list(sequences) + list(last_sequence)
+    # # shift the last sequence by -1
+    # last_sequence = np.array(pd.DataFrame(last_sequence).shift(-1).dropna())
+
+
+    if scale_sequences:
+        scaler = preprocessing.MinMaxScaler(feature_range=(0.3, 0.7))
+        scaler.fit(last_sequence.flatten().reshape(-1, 1))
+        last_sequence = scaler.transform(last_sequence)
+        result['last_sequence_scaler'] = scaler
+
     # add to result
     result['last_sequence'] = last_sequence
 
     # construct the X's and y's
-    X, y = [], []
+    X, y, scalers = [], [], []
     for seq, target in sequence_data:
+        if scale_sequences:
+            scaler = preprocessing.MinMaxScaler(feature_range=(0.3, 0.7))
+            scaler.fit(seq.flatten().reshape(-1, 1))
+            seq = scaler.transform(seq)
+            target = scaler.transform(target.reshape(-1, 1))[0][0]
+            scalers.append(scaler)
+
         X.append(seq)
         y.append(target)
 
@@ -135,21 +177,24 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     y = np.array(y)
 
     # reshape X to fit the neural network
-    X = X.reshape((X.shape[0], X.shape[2], X.shape[1]))
+
+    # X = X.reshape((X.shape[0], X.shape[2], X.shape[1]))
 
     samples = len(y)
     test_size = test_size_in_days / float(samples)
     print(f"test_size: {test_size:.2f}")
 
-    # split the dataset
-    result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
-        X, y, test_size=test_size, shuffle=shuffle)
-
-
+    ### Split the dataset 
+    ## This method isn't right. Mixes values from the same time periods
     # result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
-    #     X, y, test_size=test_size, shuffle=False)
-    # if shuffle:
-    #     result["X_train"], result["y_train"] = utils.shuffle(
-    #         result["X_train"], result["y_train"])
+    #     X, y, test_size=test_size, shuffle=shuffle)
+
+    ## Splits train and test data and then shuffle
+    result["X_train"], result["X_test"], result["y_train"], result["y_test"], result["scalers_train"], result["scalers_test"] = train_test_split(
+        X, y, scalers, test_size=test_size, shuffle=False)
+
+    if shuffle:
+        result["X_train"], result["y_train"] = utils.shuffle(
+            result["X_train"], result["y_train"])
 
     return result
