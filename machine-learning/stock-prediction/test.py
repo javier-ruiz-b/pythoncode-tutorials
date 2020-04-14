@@ -1,10 +1,11 @@
 from model import create_model
 from load_data import load_data
 from parameters import *
+from matplotlib.colors import ListedColormap
+from sklearn.metrics import accuracy_score, mean_absolute_error, mean_squared_error
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from sklearn.metrics import accuracy_score, mean_absolute_error, mean_squared_error
 
 
 def inverse_transform_sequence_scaling(y_test, y_pred):
@@ -42,13 +43,44 @@ def mae_pred_and_test(model, data):
     return mean_absolute_error(y_test, y_pred)
 
 
-def get_accuracy_buy_hold_sell(model, data):
+def get_accuracy_buy_hold_sell(model, data, plot=False):
     y_test = data["y_test"]
     X_test = data["X_test"]
     y_pred = model.predict(X_test)
 
     m = tf.keras.metrics.CategoricalAccuracy()
     m.update_state(y_test, y_pred)
+
+    # if plot:
+    # fig, ax = plt.subplots()
+    fig, ax = plt.subplots(4, sharex='all',
+                           gridspec_kw=dict(height_ratios=[6, 1,1,1]))
+
+    category_test = np.array([tf.math.argmax(x).numpy() for x in y_test])
+    category_pred = np.array([tf.math.argmax(x).numpy() for x in y_pred])
+
+    matches = (category_test == category_pred).astype(int)
+    # .shift(LOOKUP_STEP)
+    price = data['df'][TARGET].values[-(len(category_test) +
+                                        LOOKUP_STEP):-LOOKUP_STEP]
+    ax[0].plot(price, 'k')
+    ax[1].imshow(category_test[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
+              vmin=0.0, vmax=2.0)
+    ax[2].imshow(category_pred[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
+                 vmin=0.0, vmax=2.0)
+
+    ax[3].imshow(matches[None, :], cmap=ListedColormap(["red", "green"]), aspect='auto',
+              vmin=0.0, vmax=2.0)
+
+    plt.xlabel("Days")
+    plt.ylabel("Price")
+    plt.legend(["Actual Price", "Predicted Price"])
+
+    # fig.show()
+    plt.subplots_adjust(hspace=0)
+    plt.show()
+
+
 
     return m.result().numpy()
 
@@ -114,7 +146,6 @@ data = load_data(test_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP, test_size
 
 # construct the model
 model = create_model(N_STEPS, N_FEATURES, loss=LOSS, optimizer=OPTIMIZER)
-
 model_path = os.path.join("results", model_name) + ".h5"
 model.load_weights(model_path)
 
@@ -135,7 +166,7 @@ accuracy = get_accuracy_buy_hold_sell(model, data)
 print(f"Accuracy Score: {accuracy:.2f}%",)
 
 prediction = predict_category(model, data)
-print(f"Prediction in the next ", LOOKUP_STEP, " days: ", prediction)
+print(f"Prediction in the next", LOOKUP_STEP, "days:", prediction)
 
 # show_plot = sys.argv[1]
 # if show_plot:

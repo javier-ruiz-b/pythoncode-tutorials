@@ -9,7 +9,7 @@ ACTIVATION_OUTPUT = "softmax"
 
 def create_model(n_steps, n_features, dropout=0.4,
                 loss="mean_absolute_error", optimizer="rmsprop"):
-    model = create_model_conv(n_steps, n_features, dropout, loss, optimizer)
+    model = create_model_lstm_3(n_steps, n_features, dropout, loss, optimizer)
     model.summary()
     return model
 
@@ -111,7 +111,9 @@ def create_model_lstm_3(n_steps, n_features, dropout, loss, optimizer):
     model.add(Dropout(dropout))
 
     model.add(Dense(64))
-    model.add(Dropout(dropout))
+    model.add(Dropout(0.2))
+    # model.add(Dense(32))
+    # model.add(Dropout(0.2))
     model.add(Dense(3, activation=ACTIVATION_OUTPUT))
     model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 

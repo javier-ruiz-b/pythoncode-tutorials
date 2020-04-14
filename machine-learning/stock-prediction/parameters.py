@@ -31,7 +31,7 @@ LOSS = 'categorical_crossentropy'
 
 OPTIMIZER = "adam"
 # OPTIMIZER = "rmsprop"
-BATCH_SIZE = 2048 # train x batches at once
+BATCH_SIZE = 64 # train x batches at once
 EPOCHS = 600
 PATIENCE = 10
 
@@ -39,7 +39,7 @@ PATIENCE = 10
 N_STEPS = 120
 N_FEATURES = len(FEATURE_COLUMNS) + len(STAT_COLUMNS)
 # Lookup step, 1 is the next day
-LOOKUP_STEP = 60
+LOOKUP_STEP = 10
 
 # test ratio size, 0.2 is 20%
 # TEST_SIZE = 0.2

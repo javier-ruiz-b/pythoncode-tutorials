@@ -77,6 +77,7 @@ def load_data(csv_files, relativize=False, n_steps=50, shuffle=True, lookup_step
     
 def get_buy_hold_sell_targets(df, target, lookup_step):
     data = df[target]
+    # df['target'] = data
     maxs = data.rolling(lookup_step+1).max().shift(-lookup_step)
     mins = data.rolling(lookup_step+1).min().shift(-lookup_step)
 
@@ -88,10 +89,10 @@ def get_buy_hold_sell_targets(df, target, lookup_step):
     mindiff = data-mins
     # means = data.rolling(lookup_step).mean().shift(-lookup_step)
     
-    factor = 1000.0
+    factor = 2.0
     buy = maxdiff > mindiff * factor
     sell = mindiff > maxdiff * factor
-    hold = ~ (buy | sell)
+    hold = buy #~ (buy | sell) 
 
     targets = np.array([buy.astype(int), hold.astype(int), sell.astype(int)]).transpose()
     print(f"Targets: ",targets.sum(axis=0))
@@ -142,8 +143,8 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     result["column_scaler"] = column_scaler
 
     # add the target column (label) by shifting by `lookup_step`
-    future = df[target].shift(-lookup_step)
-    future.drop(future.tail(lookup_step).index, inplace=True)
+    # future = df[target].shift(-lookup_step)
+    # future.drop(future.tail(lookup_step).index, inplace=True)
 
     targets = get_buy_hold_sell_targets(df, target, lookup_step)
 
