@@ -32,7 +32,7 @@ OPTIMIZER = "adam"
 # OPTIMIZER = "rmsprop"
 BATCH_SIZE = 512 # train x batches at once
 EPOCHS = 600
-PATIENCE = 30
+PATIENCE = 3
 
 # Window size or the sequence length
 N_STEPS = 90
@@ -42,7 +42,7 @@ LOOKUP_STEP = 5
 
 # test ratio size, 0.2 is 20%
 # TEST_SIZE = 0.2
-TEST_SIZE_IN_DAYS = 30*30
+TEST_SIZE_IN_DAYS = 30*12*5
 
 
 # model name to save

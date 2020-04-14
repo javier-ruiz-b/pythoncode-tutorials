@@ -100,11 +100,11 @@ model.load_weights(model_path)
 # evaluate the model
 mse, mae = model.evaluate(data["X_test"], data["y_test"])
 # calculate the mean absolute error (inverse scaling)
-mae_inverted = data["column_scaler"][TARGET].inverse_transform(mae.reshape(1, -1))[0][0]
+# mae_inverted = data["column_scaler"][TARGET].inverse_transform(mae.reshape(1, -1))[0][0]
 
 mae_pred_test = mae_pred_and_test(model, data)
 
-print(f"MSE: {mse}, MAE: {mae}, MAE inv: {mae_inverted}, mae prediction and test: {mae_pred_test}")
+print(f"MSE: {mse}, MAE: {mae}, mae prediction and test: {mae_pred_test}")
 # predict the future price
 future_price = predict(model, data)
 print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")

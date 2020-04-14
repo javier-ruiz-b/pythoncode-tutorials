@@ -123,7 +123,8 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     result["column_scaler"] = column_scaler
 
     # add the target column (label) by shifting by `lookup_step`
-    df['future'] = df[target].shift(-lookup_step)
+    future = df[target].shift(-lookup_step)
+    future.drop(future.tail(lookup_step).index, inplace=True)
 
     # last `lookup_step` columns contains NaN in future column
     # get them before droping NaNs
@@ -131,13 +132,13 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     # get last_sequence for prediction
     last_sequence = np.array(df[feature_columns].tail(n_steps))
 
-    # drop NaNs
-    df.dropna(inplace=True)
+    # # drop NaNs
+    # df.dropna(inplace=True)
 
     sequence_data = []
     sequences = deque(maxlen=n_steps)
 
-    for entry, target in zip(df[feature_columns].values, df['future'].values):
+    for entry, target in zip(df[feature_columns].values, future.values):
         sequences.append(entry)
         if len(sequences) == n_steps:
             sequence_data.append([np.array(sequences), target])
