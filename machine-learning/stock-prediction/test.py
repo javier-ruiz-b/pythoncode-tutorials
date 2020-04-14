@@ -42,6 +42,18 @@ def mae_pred_and_test(model, data):
     return mean_absolute_error(y_test, y_pred)
 
 
+def get_accuracy_buy_hold_sell(model, data):
+    y_test = data["y_test"]
+    X_test = data["X_test"]
+    y_pred = model.predict(X_test)
+
+    m = tf.keras.metrics.CategoricalAccuracy()
+    m.update_state(y_test, y_pred)
+
+    return m.result().numpy()
+
+
+
 def get_accuracy_and_plot(model, data, plot=False):
     y_test = data["y_test"]
     X_test = data["X_test"]
@@ -99,16 +111,17 @@ model.load_weights(model_path)
 
 # evaluate the model
 mse, mae = model.evaluate(data["X_test"], data["y_test"])
+print(f"MSE: {mse}, MAE: {mae}")
 # calculate the mean absolute error (inverse scaling)
 # mae_inverted = data["column_scaler"][TARGET].inverse_transform(mae.reshape(1, -1))[0][0]
 
-mae_pred_test = mae_pred_and_test(model, data)
+# mae_pred_test = mae_pred_and_test(model, data)
 
-print(f"MSE: {mse}, MAE: {mae}, mae prediction and test: {mae_pred_test}")
-# predict the future price
-future_price = predict(model, data)
-print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
-accuracy = get_accuracy_and_plot(model, data, len(sys.argv)>1)*100.0
+# # predict the future price
+# future_price = predict(model, data)
+# print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
+# accuracy = get_accuracy_and_plot(model, data, len(sys.argv)>1)*100.0
+accuracy = get_accuracy_buy_hold_sell(model, data)
 print(f"Accuracy Score: {accuracy:.2f}%",)
 
 # show_plot = sys.argv[1]

@@ -35,6 +35,6 @@ history = model.fit(data["X_train"], data["y_train"],
                     epochs=EPOCHS,
                     validation_data=(data["X_test"], data["y_test"]),
                     callbacks=[checkpointer, tensorboard, earlystopping],
-                    verbose=0)
+                    verbose=2)
 
 model.save(os.path.join("results", model_name) + ".h5")

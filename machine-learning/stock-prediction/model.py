@@ -1,6 +1,12 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import AveragePooling1D, GlobalAveragePooling1D, Flatten, TimeDistributed, InputLayer, Bidirectional, LSTM, Dense, Dropout, Conv1D, MaxPooling1D
 
+import tensorflow as tf
+
+
+METRICS = ['accuracy'] #
+ACTIVATION_OUTPUT = "softmax"
+
 def create_model(n_steps, n_features, dropout=0.4,
                 loss="mean_absolute_error", optimizer="rmsprop"):
     model = create_model_lstm_3(n_steps, n_features, dropout, loss, optimizer)
@@ -34,10 +40,9 @@ def create_model_conv(n_steps, n_features, dropout, loss, optimizer):
     model.add(LSTM(256, return_sequences=False))
     model.add(Dropout(dropout))
 
-    model.add(Dense(1, activation="relu"))
+    model.add(Dense(3, activation=ACTIVATION_OUTPUT))
 
-    model.compile(loss=loss, metrics=[
-                  "mean_absolute_error"], optimizer=optimizer)
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model
 
@@ -66,9 +71,8 @@ def create_model_conv_lstm(n_steps, n_features, dropout, loss, optimizer):
     model.add(LSTM(256, return_sequences=False))
     model.add(Dropout(dropout))
 
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=[
-                  "mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(3, activation=ACTIVATION_OUTPUT))
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model
 
@@ -84,9 +88,8 @@ def create_model_mixed_bidirectional_lstm(n_steps, n_features, dropout, loss, op
     model.add(LSTM(128, return_sequences=False))
     model.add(Dropout(dropout))
 
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=[
-                  "mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(1, activation=ACTIVATION_OUTPUT))
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model
 
@@ -97,19 +100,17 @@ def create_model_lstm_3(n_steps, n_features, dropout, loss, optimizer):
     model.add(LSTM(64, return_sequences=True,
                    input_shape=(n_steps, n_features)))
     model.add(Dropout(dropout))
-    model.add(LSTM(64, return_sequences=True))
-    model.add(Dropout(dropout))
-    model.add(LSTM(64, return_sequences=True))
-    model.add(Dropout(dropout))
+    # model.add(LSTM(64, return_sequences=True))
+    # model.add(Dropout(dropout))
     # model.add(LSTM(256, return_sequences=True))
     # model.add(Dropout(dropout))
     model.add(LSTM(256, return_sequences=False))
     model.add(Dropout(dropout))
 
-    model.add(Dense(32))
-    model.add(Dense(1, activation="relu"))
-    model.compile(loss=loss, metrics=[
-                  "mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(64))
+    model.add(Dropout(dropout))
+    model.add(Dense(3, activation=ACTIVATION_OUTPUT))
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model
 
@@ -125,9 +126,8 @@ def create_model_bidirectional_lstm(n_steps, n_features, dropout, loss, optimize
     model.add(Bidirectional(LSTM(128, return_sequences=False)))
     model.add(Dropout(dropout))
 
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=[
-                  "mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(1, activation=ACTIVATION_OUTPUT))
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model
 
@@ -139,8 +139,8 @@ def create_model_lstm_simplified(n_steps, n_features, dropout, loss, optimizer):
     model.add(Dropout(dropout))
     model.add(LSTM(256, return_sequences=False))
     model.add(Dropout(dropout))
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(1, activation=ACTIVATION_OUTPUT))
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model
 
@@ -164,7 +164,7 @@ def create_model_lstm_original(n_steps, n_features, dropout=0.4,
         # add dropout after each layer
         model.add(Dropout(dropout))
 
-    model.add(Dense(1, activation="linear"))
-    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+    model.add(Dense(1, activation=ACTIVATION_OUTPUT))
+    model.compile(loss=loss, metrics=METRICS, optimizer=optimizer)
 
     return model

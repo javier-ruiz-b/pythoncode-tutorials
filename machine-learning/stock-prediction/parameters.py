@@ -26,8 +26,9 @@ train_files = glob.glob(join(dataDir, '*.csv'))
 # RELATIVIZE_VALUES = True # prices from one day divided by the day before.
 
 # mean squared error loss
-LOSS = "mse"
-# LOSS = "mae"
+# LOSS = "mse"
+LOSS = 'categorical_crossentropy'
+
 OPTIMIZER = "adam"
 # OPTIMIZER = "rmsprop"
 BATCH_SIZE = 512 # train x batches at once
@@ -38,7 +39,7 @@ PATIENCE = 3
 N_STEPS = 90
 N_FEATURES = len(FEATURE_COLUMNS) + len(STAT_COLUMNS)
 # Lookup step, 1 is the next day
-LOOKUP_STEP = 5
+LOOKUP_STEP = 10
 
 # test ratio size, 0.2 is 20%
 # TEST_SIZE = 0.2

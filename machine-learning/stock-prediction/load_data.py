@@ -22,10 +22,8 @@ def relativize_df(df, feature_columns):
         col_data = df[column]
         col_data_shifted = col_data.shift(1)
         col_data_relativized = col_data / col_data_shifted
-        # print(col_data_relativized[1:])
         result[column] = col_data_relativized.values[1:]
     
-    # print(result)
     return result
 
 
@@ -77,6 +75,24 @@ def load_data(csv_files, relativize=False, n_steps=50, shuffle=True, lookup_step
     
     return result
     
+def get_buy_hold_sell_targets(df, target, lookup_step):
+    data = df[target]
+    maxs = data.rolling(lookup_step+1).max().shift(-lookup_step)
+    mins = data.rolling(lookup_step+1).min().shift(-lookup_step)
+
+    data.drop(data.tail(lookup_step).index, inplace=True)
+    maxs.drop(maxs.tail(lookup_step).index, inplace=True)
+    mins.drop(mins.tail(lookup_step).index, inplace=True)
+
+    maxdiff = maxs-data
+    mindiff = data-mins
+    # means = data.rolling(lookup_step).mean().shift(-lookup_step)
+    
+    factor = 10.0
+    buy = maxdiff > mindiff * factor
+    sell = mindiff > maxdiff * factor
+    hold = ~ (buy | sell)
+    return np.array([buy.astype(int), hold.astype(int), sell.astype(int)]).transpose()
 
 
 def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
@@ -126,6 +142,8 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     future = df[target].shift(-lookup_step)
     future.drop(future.tail(lookup_step).index, inplace=True)
 
+    targets = get_buy_hold_sell_targets(df, target, lookup_step)
+
     # last `lookup_step` columns contains NaN in future column
     # get them before droping NaNs
     # last_sequence = np.array(df[feature_columns].tail(lookup_step))
@@ -138,21 +156,14 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     sequence_data = []
     sequences = deque(maxlen=n_steps)
 
-    for entry, target in zip(df[feature_columns].values, future.values):
+    for entry, target in zip(df[feature_columns].values, targets):
         sequences.append(entry)
         if len(sequences) == n_steps:
             sequence_data.append([np.array(sequences), target])
 
-    # get the last sequence by appending the last `n_step` sequence with `lookup_step` sequence
-    # for instance, if n_steps=50 and lookup_step=10, last_sequence should be of 59 (that is 50+10-1) length
-    # this last_sequence will be used to predict in future dates that are not available in the dataset
-    # last_sequence = list(sequences) + list(last_sequence)
-    # # shift the last sequence by -1
-    # last_sequence = np.array(pd.DataFrame(last_sequence).shift(-1).dropna())
-
 
     if scale_sequences:
-        scaler = preprocessing.MinMaxScaler(feature_range=(0.3, 0.7))
+        scaler = preprocessing.MinMaxScaler()
         scaler.fit(last_sequence.flatten().reshape(-1, 1))
         last_sequence = scaler.transform(last_sequence)
         result['last_sequence_scaler'] = scaler
@@ -164,10 +175,10 @@ def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
     X, y, scalers = [], [], []
     for seq, target in sequence_data:
         if scale_sequences:
-            scaler = preprocessing.MinMaxScaler(feature_range=(0.3, 0.7))
+            scaler = preprocessing.MinMaxScaler()
             scaler.fit(seq.flatten().reshape(-1, 1))
             seq = scaler.transform(seq)
-            target = scaler.transform(target.reshape(-1, 1))[0][0]
+            # target = scaler.transform(target.reshape(-1, 1))[0][0]
             scalers.append(scaler)
 
         X.append(seq)
