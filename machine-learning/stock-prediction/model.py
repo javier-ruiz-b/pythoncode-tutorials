@@ -9,17 +9,17 @@ ACTIVATION_OUTPUT = "softmax"
 
 def create_model(n_steps, n_features, dropout=0.4,
                 loss="mean_absolute_error", optimizer="rmsprop"):
-    model = create_model_lstm_3(n_steps, n_features, dropout, loss, optimizer)
+    model = create_model_conv(n_steps, n_features, dropout, loss, optimizer)
     model.summary()
     return model
 
 
 def create_model_conv(n_steps, n_features, dropout, loss, optimizer):
     model = Sequential()
-    model.add(Conv1D(filters=64, kernel_size=2, activation='relu',
+    model.add(Conv1D(filters=32, kernel_size=2, activation='relu',
                      input_shape=(n_steps, n_features)))
     # model.add(Conv1D(filters=256, kernel_size=1))
-    # model.add(Conv1D(filters=48, kernel_size=2, activation='relu'))
+    # model.add(Conv1D(filters=64, kernel_size=2, activation='relu'))
     # model.add(Dropout(0.5))
     model.add(AveragePooling1D(pool_size=2))
 
@@ -31,14 +31,17 @@ def create_model_conv(n_steps, n_features, dropout, loss, optimizer):
     # model.add(AveragePooling1D(pool_size=2, strides=1))
 
     # model.add(Bidirectional(LSTM(256, return_sequences=True)))
-    model.add(LSTM(64, return_sequences=True))
+    model.add(LSTM(32, return_sequences=True))
     model.add(Dropout(dropout))
 
-    # model.add(LSTM(48, return_sequences=True))
+    # model.add(LSTM(64, return_sequences=True))
     # model.add(Dropout(dropout))
 
-    model.add(LSTM(256, return_sequences=False))
+    model.add(LSTM(64, return_sequences=False))
     model.add(Dropout(dropout))
+
+    # model.add(Dense(64))
+    # model.add(Dropout(0.2))
 
     model.add(Dense(3, activation=ACTIVATION_OUTPUT))
 

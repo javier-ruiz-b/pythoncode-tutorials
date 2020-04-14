@@ -53,7 +53,6 @@ def get_accuracy_buy_hold_sell(model, data):
     return m.result().numpy()
 
 
-
 def get_accuracy_and_plot(model, data, plot=False):
     y_test = data["y_test"]
     X_test = data["X_test"]
@@ -99,6 +98,16 @@ def predict(model, data):
     return predicted_price
 
 
+def predict_category(model, data):
+    last_sequence = data["last_sequence"]
+
+    last_sequence = np.expand_dims(last_sequence, axis=0)
+    prediction = model.predict(last_sequence)
+
+    labels = ['buy', 'hold', 'sell']
+    return labels[tf.math.argmax(prediction[0]).numpy()]
+
+
 # load the data
 data = load_data(test_files, n_steps=N_STEPS, lookup_step=LOOKUP_STEP, test_size_in_days=TEST_SIZE_IN_DAYS,
                  feature_columns=FEATURE_COLUMNS, stat_columns=STAT_COLUMNS, target=TARGET, shuffle=False)
@@ -109,9 +118,10 @@ model = create_model(N_STEPS, N_FEATURES, loss=LOSS, optimizer=OPTIMIZER)
 model_path = os.path.join("results", model_name) + ".h5"
 model.load_weights(model_path)
 
+print(f"Counts: ", data["y_test"].sum(axis=0))
 # evaluate the model
-mse, mae = model.evaluate(data["X_test"], data["y_test"])
-print(f"MSE: {mse}, MAE: {mae}")
+loss, acc = model.evaluate(data["X_test"], data["y_test"])
+print(f"Loss: {loss:.4f}, Accuracy: {acc:.4f}")
 # calculate the mean absolute error (inverse scaling)
 # mae_inverted = data["column_scaler"][TARGET].inverse_transform(mae.reshape(1, -1))[0][0]
 
@@ -119,10 +129,13 @@ print(f"MSE: {mse}, MAE: {mae}")
 
 # # predict the future price
 # future_price = predict(model, data)
-# print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
+# print(f"Fteuture price after {LOOKUP_STEP} days is {future_price:.2f}$")
 # accuracy = get_accuracy_and_plot(model, data, len(sys.argv)>1)*100.0
 accuracy = get_accuracy_buy_hold_sell(model, data)
 print(f"Accuracy Score: {accuracy:.2f}%",)
+
+prediction = predict_category(model, data)
+print(f"Prediction in the next ", LOOKUP_STEP, " days: ", prediction)
 
 # show_plot = sys.argv[1]
 # if show_plot:

@@ -88,11 +88,14 @@ def get_buy_hold_sell_targets(df, target, lookup_step):
     mindiff = data-mins
     # means = data.rolling(lookup_step).mean().shift(-lookup_step)
     
-    factor = 10.0
+    factor = 1000.0
     buy = maxdiff > mindiff * factor
     sell = mindiff > maxdiff * factor
     hold = ~ (buy | sell)
-    return np.array([buy.astype(int), hold.astype(int), sell.astype(int)]).transpose()
+
+    targets = np.array([buy.astype(int), hold.astype(int), sell.astype(int)]).transpose()
+    print(f"Targets: ",targets.sum(axis=0))
+    return targets
 
 
 def load_data_single(df, n_steps=50, shuffle=True, lookup_step=1,
