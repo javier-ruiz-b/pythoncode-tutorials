@@ -5,7 +5,8 @@ import tensorflow as tf
 
 
 METRICS = ['accuracy'] #
-ACTIVATION_OUTPUT = "softmax"
+ACTIVATION_OUTPUT = "sigmoid"
+# ACTIVATION_OUTPUT = "softmax"
 
 def create_model(n_steps, n_features, dropout=0.4,
                 loss="mean_absolute_error", optimizer="rmsprop"):
