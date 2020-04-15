@@ -54,7 +54,7 @@ def get_accuracy_buy_hold_sell(model, data, plot=False):
     if plot:
         # fig, ax = plt.subplots()
         fig, ax = plt.subplots(4, sharex='all',
-                            gridspec_kw=dict(height_ratios=[6, 1,1,1]))
+                            gridspec_kw=dict(height_ratios=[4, 1,1,1]))
 
         category_test = np.array([tf.math.argmax(x).numpy() for x in y_test])
         category_pred = np.array([tf.math.argmax(x).numpy() for x in y_pred])
@@ -64,16 +64,17 @@ def get_accuracy_buy_hold_sell(model, data, plot=False):
         price = data['df'][TARGET].values[-(len(category_test) +
                                             LOOKUP_STEP):-LOOKUP_STEP]
         ax[0].plot(price, 'k')
+        
         ax[1].imshow(category_test[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
-                vmin=0.0, vmax=2.0)
+                     vmin=0.0, vmax=2.0)
+
         ax[2].imshow(category_pred[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
                     vmin=0.0, vmax=2.0)
 
         ax[3].imshow(matches[None, :], cmap=ListedColormap(["red", "green"]), aspect='auto',
-                vmin=0.0, vmax=2.0)
+                     vmin=0.0, vmax=2.0)
 
         plt.xlabel("Days")
-        plt.ylabel("Price")
         plt.legend(["Actual Price", "Predicted Price"])
 
         # fig.show()
@@ -162,7 +163,7 @@ print(f"Loss: {loss:.4f}, Accuracy: {acc:.4f}")
 # future_price = predict(model, data)
 # print(f"Fteuture price after {LOOKUP_STEP} days is {future_price:.2f}$")
 # accuracy = get_accuracy_and_plot(model, data, len(sys.argv)>1)*100.0
-accuracy = get_accuracy_buy_hold_sell(model, data)
+accuracy = get_accuracy_buy_hold_sell(model, data, len(sys.argv) > 1)*100.0
 print(f"Accuracy Score: {accuracy:.2f}%",)
 
 prediction = predict_category(model, data)

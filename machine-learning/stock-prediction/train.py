@@ -40,10 +40,10 @@ class_weights = class_weight.compute_class_weight('balanced',
 
 print("Class weights: ", class_weights,
       ", sums: ", data["y_train"].sum(axis=0))
-
+weights = {0: class_weights[0], 1: class_weights[1], 2: class_weights[2]}
 history = model.fit(data["X_train"], data["y_train"],
                     batch_size=BATCH_SIZE,
-                    class_weight=class_weights,
+                    class_weight=weights,
                     epochs=EPOCHS,
                     validation_data=(data["X_test"], data["y_test"]),
                     callbacks=[checkpointer, tensorboard, earlystopping],

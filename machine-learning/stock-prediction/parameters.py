@@ -27,13 +27,13 @@ train_files = glob.glob(join(dataDir, '*.csv'))
 
 # mean squared error loss
 # LOSS = "mse"
-LOSS = 'categorical_crossentropy'
+LOSS = 'binary_crossentropy'
 
 OPTIMIZER = "adam"
 # OPTIMIZER = "rmsprop"
 BATCH_SIZE = 256 # train x batches at once
 EPOCHS = 600
-PATIENCE = 35
+PATIENCE = 3
 
 # Window size or the sequence length
 N_STEPS = 120

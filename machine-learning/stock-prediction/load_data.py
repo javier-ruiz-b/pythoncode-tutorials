@@ -89,7 +89,7 @@ def get_buy_hold_sell_targets(df, target, lookup_step):
     mindiff = mins/data
     # means = data.rolling(lookup_step).mean().shift(-lookup_step)
     
-    factor = 0.5
+    factor = 0.15
     buy = maxdiff > (1+factor)
     sell = mindiff < (1-factor)
     hold = ~ (buy | sell) 

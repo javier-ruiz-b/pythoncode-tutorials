@@ -2,3 +2,4 @@ results/*
 logs/*
 data/*
 __pycache__/*
+.vscode/settings.json
