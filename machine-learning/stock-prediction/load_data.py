@@ -85,14 +85,14 @@ def get_buy_hold_sell_targets(df, target, lookup_step):
     maxs.drop(maxs.tail(lookup_step).index, inplace=True)
     mins.drop(mins.tail(lookup_step).index, inplace=True)
 
-    maxdiff = maxs-data
-    mindiff = data-mins
+    maxdiff = maxs/data
+    mindiff = mins/data
     # means = data.rolling(lookup_step).mean().shift(-lookup_step)
     
-    factor = 2.0
-    buy = maxdiff > mindiff * factor
-    sell = mindiff > maxdiff * factor
-    hold = buy #~ (buy | sell) 
+    factor = 0.5
+    buy = maxdiff > (1+factor)
+    sell = mindiff < (1-factor)
+    hold = ~ (buy | sell) 
 
     targets = np.array([buy.astype(int), hold.astype(int), sell.astype(int)]).transpose()
     print(f"Targets: ",targets.sum(axis=0))

@@ -51,34 +51,34 @@ def get_accuracy_buy_hold_sell(model, data, plot=False):
     m = tf.keras.metrics.CategoricalAccuracy()
     m.update_state(y_test, y_pred)
 
-    # if plot:
-    # fig, ax = plt.subplots()
-    fig, ax = plt.subplots(4, sharex='all',
-                           gridspec_kw=dict(height_ratios=[6, 1,1,1]))
+    if plot:
+        # fig, ax = plt.subplots()
+        fig, ax = plt.subplots(4, sharex='all',
+                            gridspec_kw=dict(height_ratios=[6, 1,1,1]))
 
-    category_test = np.array([tf.math.argmax(x).numpy() for x in y_test])
-    category_pred = np.array([tf.math.argmax(x).numpy() for x in y_pred])
+        category_test = np.array([tf.math.argmax(x).numpy() for x in y_test])
+        category_pred = np.array([tf.math.argmax(x).numpy() for x in y_pred])
 
-    matches = (category_test == category_pred).astype(int)
-    # .shift(LOOKUP_STEP)
-    price = data['df'][TARGET].values[-(len(category_test) +
-                                        LOOKUP_STEP):-LOOKUP_STEP]
-    ax[0].plot(price, 'k')
-    ax[1].imshow(category_test[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
-              vmin=0.0, vmax=2.0)
-    ax[2].imshow(category_pred[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
-                 vmin=0.0, vmax=2.0)
+        matches = (category_test == category_pred).astype(int)
+        # .shift(LOOKUP_STEP)
+        price = data['df'][TARGET].values[-(len(category_test) +
+                                            LOOKUP_STEP):-LOOKUP_STEP]
+        ax[0].plot(price, 'k')
+        ax[1].imshow(category_test[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
+                vmin=0.0, vmax=2.0)
+        ax[2].imshow(category_pred[None, :], cmap=ListedColormap(["green", "yellow", "red"]), aspect='auto',
+                    vmin=0.0, vmax=2.0)
 
-    ax[3].imshow(matches[None, :], cmap=ListedColormap(["red", "green"]), aspect='auto',
-              vmin=0.0, vmax=2.0)
+        ax[3].imshow(matches[None, :], cmap=ListedColormap(["red", "green"]), aspect='auto',
+                vmin=0.0, vmax=2.0)
 
-    plt.xlabel("Days")
-    plt.ylabel("Price")
-    plt.legend(["Actual Price", "Predicted Price"])
+        plt.xlabel("Days")
+        plt.ylabel("Price")
+        plt.legend(["Actual Price", "Predicted Price"])
 
-    # fig.show()
-    plt.subplots_adjust(hspace=0)
-    plt.show()
+        # fig.show()
+        plt.subplots_adjust(hspace=0)
+        plt.show()
 
 
 
